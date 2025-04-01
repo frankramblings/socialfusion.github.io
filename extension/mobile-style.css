@@ -1,0 +1,27 @@
+/* Mobile Skin Styles */
+#tc-mobile-skin {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Make sure our styles don't affect the hidden original content */
+#tc-original-content {
+  display: none !important;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  /* Tablet and larger devices */
+  .tc-mobile-main {
+    max-width: 768px;
+    margin: 0 auto;
+  }
+  
+  /* Show desktop-style side navigation instead of bottom nav */
+  .tc-mobile-side-nav {
+    display: block;
+  }
+  
+  .tc-mobile-bottom-nav {
+    display: none;
+  }
+}

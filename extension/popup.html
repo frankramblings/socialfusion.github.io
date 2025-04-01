@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Transparent Classroom Mobile Skin</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      width: 300px;
+      padding: 16px;
+      background-color: #f9f9f9;
+    }
+    
+    h1 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: #333;
+    }
+    
+    h2 {
+      font-size: 14px;
+      margin: 20px 0 10px;
+      color: #444;
+    }
+    
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+    
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+    
+    .status {
+      font-size: 14px;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+
+    .theme-options {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .theme-option {
+      flex: 1;
+      text-align: center;
+      padding: 12px 8px;
+      background-color: #f1f1f1;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 0 4px;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+    
+    .theme-option:first-child {
+      margin-left: 0;
+    }
+    
+    .theme-option:last-child {
+      margin-right: 0;
+    }
+    
+    .theme-option:hover {
+      background-color: #e5e5e5;
+    }
+    
+    .theme-option.selected {
+      border-color: #2196F3;
+      background-color: #e3f2fd;
+    }
+    
+    .theme-option .icon {
+      display: block;
+      width: 24px;
+      height: 24px;
+      margin: 0 auto 8px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    
+    .theme-option .light-icon {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'%3E%3C/circle%3E%3Cline x1='12' y1='1' x2='12' y2='3'%3E%3C/line%3E%3Cline x1='12' y1='21' x2='12' y2='23'%3E%3C/line%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'%3E%3C/line%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'%3E%3C/line%3E%3Cline x1='1' y1='12' x2='3' y2='12'%3E%3C/line%3E%3Cline x1='21' y1='12' x2='23' y2='12'%3E%3C/line%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'%3E%3C/line%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'%3E%3C/line%3E%3C/svg%3E");
+    }
+    
+    .theme-option .dark-icon {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'%3E%3C/path%3E%3C/svg%3E");
+    }
+    
+    .theme-option .system-icon {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='3' width='20' height='14' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='8' y1='21' x2='16' y2='21'%3E%3C/line%3E%3Cline x1='12' y1='17' x2='12' y2='21'%3E%3C/line%3E%3C/svg%3E");
+    }
+    
+    .footer {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <h1>Transparent Classroom Mobile Skin</h1>
+  
+  <div class="toggle-container">
+    <span>Enable Mobile Interface</span>
+    <label class="toggle">
+      <input type="checkbox" id="skinToggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+  
+  <p class="status" id="statusText">Mobile skin is active</p>
+  
+  <h2>Choose Theme</h2>
+  <div class="theme-options">
+    <div class="theme-option" data-theme="light">
+      <span class="icon light-icon"></span>
+      <span>Light</span>
+    </div>
+    <div class="theme-option" data-theme="dark">
+      <span class="icon dark-icon"></span>
+      <span>Dark</span>
+    </div>
+    <div class="theme-option selected" data-theme="system">
+      <span class="icon system-icon"></span>
+      <span>System</span>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p>Version 1.0</p>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
