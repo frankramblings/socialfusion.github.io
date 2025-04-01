@@ -1,58 +1,89 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import ChildProfile from "@/pages/ChildProfile";
-import Classmates from "@/pages/Classmates";
-import Directory from "@/pages/Directory";
+import InstallPage from "@/pages/InstallPage";
+import AuthPage from "@/pages/auth-page";
+import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
-import SideNav from "@/components/layout/SideNav";
-import BottomNav from "@/components/layout/BottomNav";
-import { useState } from "react";
-
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/child/:id" component={ChildProfile} />
-      <Route path="/classmates" component={Classmates} />
-      <Route path="/directory" component={Directory} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+import NavigationDrawer from "@/components/layout/NavigationDrawer";
+import InstallBanner from "@/components/layout/InstallBanner";
+import { useToast } from "@/hooks/use-toast";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
 
 function App() {
-  const [sideNavOpen, setSideNavOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [location] = useLocation();
+  const { toast } = useToast();
+  
+  // Check if the app is running in standalone mode (installed PWA)
+  const isInStandaloneMode = () => 
+    (window.matchMedia('(display-mode: standalone)').matches) || 
+    (window.navigator as any).standalone || 
+    document.referrer.includes('android-app://');
+  
+  // Close drawer when navigating to a new page
+  useEffect(() => {
+    setIsDrawerOpen(false);
+  }, [location]);
 
-  const toggleSideNav = () => {
-    setSideNavOpen(!sideNavOpen);
-  };
+  // Handle network status changes
+  useEffect(() => {
+    const handleOnline = () => {
+      toast({
+        title: "You're back online",
+        description: "Connected to the network",
+        variant: "default",
+      });
+    };
+
+    const handleOffline = () => {
+      toast({
+        title: "You're offline",
+        description: "Some features may be limited",
+        variant: "destructive",
+      });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [toast]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen flex flex-col bg-neutral-50">
-        <Header onMenuToggle={toggleSideNav} />
-        <SideNav isOpen={sideNavOpen} onClose={() => setSideNavOpen(false)} />
-        
-        {/* Main content */}
-        <div className="flex-1 pt-14 pb-16 md:pb-0">
-          <Router />
-        </div>
-        
-        <BottomNav />
-        <Toaster />
-        
-        {/* Overlay for side nav on mobile */}
-        {sideNavOpen && (
-          <div 
-            className="fixed inset-0 bg-black/50 z-30 md:hidden"
-            onClick={() => setSideNavOpen(false)}
+      <AuthProvider>
+        <div className="min-h-screen bg-background">
+          <Header 
+            onMenuToggle={() => setIsDrawerOpen(!isDrawerOpen)} 
           />
-        )}
-      </div>
+          <NavigationDrawer 
+            isOpen={isDrawerOpen} 
+            onClose={() => setIsDrawerOpen(false)} 
+          />
+          
+          <main className="pt-14 md:pt-16 pb-16 min-h-[calc(100vh-4rem)] transition-transform duration-300 ease-in-out">
+            <Switch>
+              <ProtectedRoute path="/" component={Home} />
+              <ProtectedRoute path="/child/:id" component={ChildProfile} />
+              <Route path="/auth" component={AuthPage} />
+              <Route path="/install" component={InstallPage} />
+              <Route component={NotFound} />
+            </Switch>
+          </main>
+          
+          {!isInStandaloneMode() && <InstallBanner />}
+          <Toaster />
+        </div>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

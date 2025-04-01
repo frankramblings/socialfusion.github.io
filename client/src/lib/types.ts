@@ -1,36 +1,52 @@
-export interface ActivityPost {
+export interface School {
   id: number;
-  classroom: string;
-  date: string;
-  content: string;
-  imageUrl?: string;
-  author: string;
-  comments?: ActivityComment[];
+  name: string;
+  location?: string;
+  logo?: string;
 }
 
-export interface ActivityComment {
+export interface User {
   id: number;
-  author: string;
-  authorImage?: string;
-  date: string;
-  content: string;
+  firstName: string;
+  lastName?: string;
+  fullName: string;
+  email: string;
+  avatar?: string;
 }
 
 export interface Child {
   id: number;
   firstName: string;
-  lastName: string;
   nickname?: string;
-  avatarUrl?: string;
-  classroom: string;
-  birthDate?: string;
+  lastName: string;
+  fullName: string;
+  avatar?: string;
+  classroom?: Classroom;
+  parent?: User;
 }
 
-export interface Contact {
+export interface Classroom {
   id: number;
   name: string;
-  role: string;
-  email: string;
-  phone?: string;
-  avatarUrl?: string;
+  teacher?: string;
+}
+
+export interface Activity {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  className: string;
+  teacher: string;
+  imageUrl?: string;
+  likes: number;
+  comments: number;
+  childId: number;
+}
+
+export interface QuickLink {
+  id: string;
+  title: string;
+  icon: string;
+  url: string;
 }
