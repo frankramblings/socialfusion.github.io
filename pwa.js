@@ -88,13 +88,19 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTransparentClassroom(savedSchool);
   }
 
-  // Handle login form submission (added auth handling)
+  // Handle login form submission
   initialLogin.addEventListener('submit', (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    //In a real app, this would involve a backend call to authenticate.
-    localStorage.setItem('auth_token', 'temp_token');
-    window.location.href = '/home';
+    const url = schoolUrl.value.trim();
+    
+    // Add https:// if missing
+    const finalUrl = !url.startsWith('https://') && !url.startsWith('http://') 
+      ? 'https://' + url 
+      : url;
+      
+    // Save the URL and redirect
+    localStorage.setItem('tc_school_url', finalUrl);
+    window.location.href = finalUrl;
   });
 
 
