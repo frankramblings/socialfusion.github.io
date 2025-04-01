@@ -809,44 +809,74 @@
   }
   
   function extractActivitiesFromPage() {
-    // Here we would implement the actual extraction of data from the original page
-    // This requires analyzing the DOM structure of Transparent Classroom
-    
     try {
-      const originalContainer = document.getElementById('tc-original-content');
-      if (!originalContainer) {
-        throw new Error('Original content container not found');
+      const originalContent = document.getElementById('tc-original-content');
+      if (!originalContent) {
+        console.error('Cannot find original content container');
+        return [];
       }
       
-      // Try to find activity elements in the original page
-      // This is a placeholder - the actual implementation would depend on the page structure
+      // Find activity post elements from Transparent Classroom's HTML structure
+      // These selectors need to be adjusted based on the actual structure of the website
+      const activityElements = originalContent.querySelectorAll('.post, .activity-post, .observation');
       
-      // If extraction fails or no activities found, return sample data for demonstration
-      return [
-        {
-          classroom: 'Sunflower Room',
-          date: 'Today',
-          author: 'Ms. Jessica',
-          content: 'Today we explored color mixing and painted with watercolors!',
-          imageUrl: 'https://images.unsplash.com/photo-1560859268-3df928e195d4?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-        },
-        {
-          classroom: 'Sunflower Room',
-          date: 'Yesterday',
-          author: 'Ms. Jessica',
-          content: 'Learning about shapes and patterns through play.',
-          imageUrl: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-        },
-        {
-          classroom: 'Sunflower Room',
-          date: '2 days ago',
-          author: 'Ms. Jessica',
-          content: 'Story time! We read "The Very Hungry Caterpillar" and discussed healthy food choices.',
-          imageUrl: null
+      if (!activityElements || activityElements.length === 0) {
+        console.log('No activity elements found in original content');
+        // Try another selector pattern if the first one doesn't match
+        const alternativeElements = originalContent.querySelectorAll('.activity, .entry, .journal-entry');
+        
+        if (!alternativeElements || alternativeElements.length === 0) {
+          console.log('No alternative activity elements found either');
+          // Return empty array for now - the skin will show "No activities found"
+          return [];
         }
-      ];
+      }
+      
+      // Extract data from real activity elements
+      const activities = [];
+      
+      // Process each activity element
+      activityElements.forEach(element => {
+        try {
+          // Extract classroom info (typically in a header or title element)
+          const classroomEl = element.querySelector('.classroom-name, .room-name, .class-name, h3');
+          const classroom = classroomEl ? classroomEl.textContent.trim() : 'Classroom';
+          
+          // Extract date info
+          const dateEl = element.querySelector('.date, .timestamp, .posted-at, time');
+          const date = dateEl ? dateEl.textContent.trim() : 'Today';
+          
+          // Extract author info
+          const authorEl = element.querySelector('.teacher, .author, .posted-by, .staff-name');
+          const author = authorEl ? authorEl.textContent.trim() : 'Teacher';
+          
+          // Extract content
+          const contentEl = element.querySelector('.content, .description, .notes, .body, p');
+          const content = contentEl ? contentEl.textContent.trim() : '';
+          
+          // Extract image if available
+          let imageUrl = null;
+          const imageEl = element.querySelector('img');
+          if (imageEl && imageEl.src) {
+            imageUrl = imageEl.src;
+          }
+          
+          // Add to activities array
+          activities.push({
+            classroom,
+            date,
+            author,
+            content,
+            imageUrl
+          });
+        } catch (err) {
+          console.error('Error processing activity element:', err);
+        }
+      });
+      
+      return activities;
     } catch (error) {
-      console.error('Error extracting activities:', error);
+      console.error('Error extracting activities from page:', error);
       return [];
     }
   }
@@ -988,37 +1018,94 @@
   }
   
   function populateChildSelector() {
-    // This would extract child data from the actual page
-    // For now, use sample data
-    const childSelect = document.getElementById('child-select');
-    if (!childSelect) return;
-    
-    // Clear existing options except the first one
-    while (childSelect.options.length > 1) {
-      childSelect.remove(1);
-    }
-    
-    // Add sample children
-    const sampleChildren = [
-      { id: 1, name: 'Emma Johnson' },
-      { id: 2, name: 'Noah Williams' },
-      { id: 3, name: 'Olivia Smith' }
-    ];
-    
-    sampleChildren.forEach(child => {
-      const option = document.createElement('option');
-      option.value = child.id.toString();
-      option.textContent = child.name;
-      childSelect.appendChild(option);
-    });
-    
-    // Add event listener for child selection
-    childSelect.addEventListener('change', function() {
-      const selectedChildId = childSelect.value;
-      if (selectedChildId) {
-        alert('Showing activities for child ID: ' + selectedChildId);
-        // In a real implementation, this would filter activities
+    try {
+      const childSelect = document.getElementById('child-select');
+      if (!childSelect) return;
+      
+      // Clear existing options except the first one
+      while (childSelect.options.length > 1) {
+        childSelect.remove(1);
       }
-    });
+      
+      const originalContent = document.getElementById('tc-original-content');
+      if (!originalContent) {
+        console.error('Cannot find original content container for child data');
+        return;
+      }
+      
+      // Try to find child selector elements in the original page
+      // These selectors need to be adjusted based on the actual structure of the website
+      const childElements = originalContent.querySelectorAll('.child-option, .student-option, .child-select-option');
+      
+      // If no child elements found with specific classes, try to find dropdowns or select elements
+      if (!childElements || childElements.length === 0) {
+        const selectElements = originalContent.querySelectorAll('select');
+        
+        // Look through all select elements to find one likely containing children
+        for (const select of selectElements) {
+          // Check if select element contains children-related options
+          const childOption = Array.from(select.options).find(opt => 
+            opt.textContent.includes('child') || 
+            select.id.includes('child') || 
+            select.name.includes('child') ||
+            select.className.includes('child')
+          );
+          
+          if (childOption) {
+            // Found likely child selector, use these options
+            Array.from(select.options).forEach(opt => {
+              if (opt.value && opt.textContent.trim() !== '') {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.textContent.trim();
+                childSelect.appendChild(option);
+              }
+            });
+            break;
+          }
+        }
+      } else {
+        // Process direct child elements
+        childElements.forEach(element => {
+          const value = element.getAttribute('data-id') || element.getAttribute('value') || '';
+          const name = element.textContent.trim();
+          
+          if (name) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = name;
+            childSelect.appendChild(option);
+          }
+        });
+      }
+      
+      // If no children found via any method, add a message option
+      if (childSelect.options.length <= 1) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No children found - try switching pages';
+        option.disabled = true;
+        childSelect.appendChild(option);
+      }
+      
+      // Add event listener for child selection
+      childSelect.addEventListener('change', function() {
+        const selectedChildId = childSelect.value;
+        if (selectedChildId) {
+          // Find child-specific activities
+          const activitiesContainer = document.getElementById('activities-container');
+          if (activitiesContainer) {
+            activitiesContainer.innerHTML = '<div class="loading">Loading activities for selected child...</div>';
+            
+            // In a real implementation, this would filter or request child-specific activities
+            setTimeout(() => {
+              extractAndProcessData();
+            }, 500);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error populating child selector:', error);
+    }
   }
 })();

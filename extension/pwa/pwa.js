@@ -98,9 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
       ? 'https://' + url 
       : url;
       
-    // Save the URL and redirect
+    // Save the URL and load in frame
     localStorage.setItem('tc_school_url', finalUrl);
-    window.location.href = finalUrl;
+    const frame = document.getElementById('tc-frame');
+    frame.src = finalUrl;
+    initialLogin.classList.add('hidden');
   });
 
 
