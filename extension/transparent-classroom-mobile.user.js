@@ -149,9 +149,10 @@
     mobileApp.style.left = '0';
     mobileApp.style.width = '100%';
     mobileApp.style.height = '100%';
-    mobileApp.style.zIndex = '9990';
-    mobileApp.style.backgroundColor = '#ffffff';
+    mobileApp.style.zIndex = '9999';
+    mobileApp.style.backgroundColor = 'var(--background, #ffffff)';
     mobileApp.style.overflow = 'auto';
+    mobileApp.style.webkitOverflowScrolling = 'touch';
     
     // Create the UI structure
     createMobileUI(mobileApp);
@@ -177,6 +178,15 @@
     const controlBtn = document.getElementById('tc-mobile-control');
     if (controlBtn) {
       document.body.appendChild(controlBtn);
+      controlBtn.style.zIndex = '10000';
+    }
+    
+    // Add proper viewport meta tag for mobile if it doesn't exist
+    if (!document.querySelector('meta[name="viewport"]')) {
+      const metaViewport = document.createElement('meta');
+      metaViewport.name = 'viewport';
+      metaViewport.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
+      document.head.appendChild(metaViewport);
     }
     
     // Apply the current theme
@@ -439,46 +449,55 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       }
       
-      /* Light Theme (Default) */
+      /* Light Theme (Default) - Modern, elegant design */
       #tc-mobile-skin {
-        --background: #f5f5f5;
-        --foreground: #333333;
-        --muted-foreground: #666666;
-        --primary: #6bab64;
+        --background: #f8f9fa;
+        --foreground: #1a1a1a;
+        --muted-foreground: #717171;
+        --primary: #4f9a94;
         --primary-foreground: #ffffff;
-        --secondary: #f9f9f9;
-        --secondary-foreground: #333333;
-        --border: #e0e0e0;
+        --secondary: #f1f3f5;
+        --secondary-foreground: #1a1a1a;
+        --border: #e4e8ec;
         --card: #ffffff;
-        --card-foreground: #333333;
-        --card-border: #f0f0f0;
-        --accent: #edf7ec;
-        --accent-foreground: #4a7d45;
-        --avatar-bg: #f0f0f0;
-        --avatar-text: #666666;
-        --transparent-white: rgba(255, 255, 255, 0.9);
-        --highlight: #ff6b89;
+        --card-foreground: #1a1a1a;
+        --card-border: #f0f2f5;
+        --accent: #e6f2f1;
+        --accent-foreground: #3b7671;
+        --avatar-bg: #f0f2f5;
+        --avatar-text: #4f9a94;
+        --transparent-white: rgba(255, 255, 255, 0.95);
+        --highlight: #f27474;
+        --success: #4caf50;
+        --info: #2196f3;
+        --radius: 12px;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md: 0 2px 8px rgba(0,0,0,0.07);
+        --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+        --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
       
-      /* Dark Theme */
+      /* Dark Theme - Elegant, reduced eye strain */
       #tc-mobile-skin.theme-dark {
-        --background: #121212;
-        --foreground: #f0f0f0;
-        --muted-foreground: #bbbbbb;
-        --primary: #7dbc76;
+        --background: #111827;
+        --foreground: #f3f4f6;
+        --muted-foreground: #9ca3af;
+        --primary: #5bb5ac;
         --primary-foreground: #ffffff;
-        --secondary: #1e1e1e;
-        --secondary-foreground: #f0f0f0;
-        --border: #333333;
-        --card: #1e1e1e;
-        --card-foreground: #f0f0f0;
-        --card-border: #2a2a2a;
-        --accent: #294025;
-        --accent-foreground: #8cc887;
-        --avatar-bg: #333333;
-        --avatar-text: #eeeeee;
-        --transparent-white: rgba(18, 18, 18, 0.9);
-        --highlight: #e55977;
+        --secondary: #1f2937;
+        --secondary-foreground: #f3f4f6;
+        --border: #374151;
+        --card: #1f2937;
+        --card-foreground: #f3f4f6;
+        --card-border: #2c3a4e;
+        --accent: #1a3330;
+        --accent-foreground: #5bb5ac;
+        --avatar-bg: #2c3a4e;
+        --avatar-text: #9ca3af;
+        --transparent-white: rgba(17, 24, 39, 0.95);
+        --highlight: #ef4444;
+        --success: #10b981;
+        --info: #3b82f6;
       }
       
       #tc-mobile-skin, 
@@ -487,7 +506,7 @@
         color: var(--foreground);
       }
       
-      /* Header */
+      /* Header - modern elegant design */
       .tc-mobile-header {
         position: fixed;
         top: 0;
@@ -498,6 +517,16 @@
         color: var(--foreground);
         z-index: 10;
         border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        background-color: rgba(255, 255, 255, 0.85);
+        box-shadow: var(--shadow-sm);
+        padding-top: env(safe-area-inset-top, 0);
+        height: calc(60px + env(safe-area-inset-top, 0));
+      }
+      
+      .theme-dark .tc-mobile-header {
+        background-color: rgba(31, 41, 55, 0.85);
       }
       
       .header-content {
@@ -602,8 +631,21 @@
       /* Main content */
       .tc-mobile-main {
         padding: 120px 16px 80px; /* More padding at top for child selector */
-        min-height: 100%;
+        min-height: 100vh;
         background-color: var(--background);
+        position: relative;
+        z-index: 1;
+      }
+      
+      #tc-mobile-skin {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
       
       .date-filter {
@@ -659,14 +701,20 @@
         background-position: center;
       }
       
-      /* Activity cards */
+      /* Activity cards - elegant, modern design */
       .activity-card {
         background-color: var(--card);
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        margin-bottom: 16px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-md);
+        margin-bottom: 20px;
         overflow: hidden;
         border: 1px solid var(--border);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      
+      .activity-card:active {
+        transform: translateY(1px);
+        box-shadow: var(--shadow-sm);
       }
       
       .activity-image-container {
@@ -1041,7 +1089,7 @@
         font-size: 14px;
       }
       
-      /* Bottom Navigation */
+      /* Bottom Navigation - Modern, iOS-like style */
       .tc-mobile-bottom-nav {
         position: fixed;
         bottom: 0;
@@ -1056,6 +1104,14 @@
         z-index: 10;
         padding-bottom: env(safe-area-inset-bottom, 0);
         height: calc(60px + env(safe-area-inset-bottom, 0));
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        background-color: rgba(255, 255, 255, 0.85);
+        box-shadow: var(--shadow-sm);
+      }
+      
+      .theme-dark .tc-mobile-bottom-nav {
+        background-color: rgba(31, 41, 55, 0.85);
       }
       
       .nav-item {
