@@ -1,9 +1,19 @@
 // PWA initialization and setup
 let deferredPrompt; // Used to show the install prompt
 
-// Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+// Handle authentication state
+let isAuthenticated = false;
+
+window.addEventListener('load', () => {
+  // Check if we have an auth token in localStorage
+  const authToken = localStorage.getItem('auth_token');
+  if (authToken) {
+    isAuthenticated = true;
+    // Redirect to home page if authenticated
+    window.location.href = '/home';
+  }
+  // Register service worker
+  if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
       .then(registration => {
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
@@ -11,8 +21,8 @@ if ('serviceWorker' in navigator) {
       .catch(error => {
         console.log('ServiceWorker registration failed: ', error);
       });
-  });
-}
+  }
+});
 
 // Handle app installation
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -20,7 +30,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   // Stash the event so it can be triggered later
   deferredPrompt = e;
-  
+
   // Show the install banner after a delay
   setTimeout(() => {
     showInstallBanner();
@@ -30,19 +40,19 @@ window.addEventListener('beforeinstallprompt', (e) => {
 // Show install banner
 function showInstallBanner() {
   if (!deferredPrompt) return;
-  
+
   const banner = document.getElementById('install-banner');
   banner.classList.add('visible');
-  
+
   const installButton = document.getElementById('install-button');
   const dismissButton = document.getElementById('dismiss-button');
-  
+
   installButton.addEventListener('click', () => {
     banner.classList.remove('visible');
-    
+
     // Show the install prompt
     deferredPrompt.prompt();
-    
+
     // Wait for the user to respond to the prompt
     deferredPrompt.userChoice.then((choiceResult) => {
       if (choiceResult.outcome === 'accepted') {
@@ -53,10 +63,10 @@ function showInstallBanner() {
       deferredPrompt = null;
     });
   });
-  
+
   dismissButton.addEventListener('click', () => {
     banner.classList.remove('visible');
-    
+
     // Remember this choice in localStorage
     localStorage.setItem('tc_install_dismissed', 'true');
   });
@@ -69,39 +79,49 @@ document.addEventListener('DOMContentLoaded', () => {
   const initialLogin = document.getElementById('initial-login');
   const schoolUrl = document.getElementById('school-url');
   const loginButton = document.getElementById('login-button');
-  
+
   // Check if we have a saved school URL
   const savedSchool = localStorage.getItem('tc_school_url');
-  
+
   if (savedSchool) {
     initialLogin.classList.add('hidden');
     loadTransparentClassroom(savedSchool);
   }
-  
+
+  // Handle login form submission (added auth handling)
+  initialLogin.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    //In a real app, this would involve a backend call to authenticate.
+    localStorage.setItem('auth_token', 'temp_token');
+    window.location.href = '/home';
+  });
+
+
   // Handle login button click
   loginButton.addEventListener('click', () => {
     let url = schoolUrl.value.trim();
-    
+
     // Add https:// if missing
     if (!url.startsWith('https://') && !url.startsWith('http://')) {
       url = 'https://' + url;
     }
-    
+
     // Save the URL
     localStorage.setItem('tc_school_url', url);
-    
+
     // Hide login UI
     initialLogin.classList.add('hidden');
-    
+
     // Load the site
     loadTransparentClassroom(url);
   });
-  
+
   // Handle frame load events
   frame.addEventListener('load', () => {
     frame.classList.add('loaded');
     loading.classList.add('hidden');
-    
+
     // Inject our mobile skin script
     try {
       injectMobileSkin(frame);
@@ -122,21 +142,21 @@ function injectMobileSkin(frame) {
   try {
     const frameWindow = frame.contentWindow;
     const frameDocument = frame.contentDocument;
-    
+
     if (!frameWindow || !frameDocument) {
       throw new Error('Cannot access iframe content - possible CORS restriction');
     }
-    
+
     // Create a script element to inject our mobile skin
     const script = frameDocument.createElement('script');
-    
+
     // We'll use the content from mobile-skin.js
     fetch('./mobile-skin.js')
       .then(response => response.text())
       .then(code => {
         script.textContent = code;
         frameDocument.head.appendChild(script);
-        
+
         console.log('Mobile skin injected successfully');
       })
       .catch(error => {
@@ -144,7 +164,7 @@ function injectMobileSkin(frame) {
       });
   } catch (error) {
     console.error('Error injecting skin:', error);
-    
+
     // If we can't inject due to CORS, show a message to the user
     const loading = document.getElementById('loading');
     loading.innerHTML = `
