@@ -110,11 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save the URL
     localStorage.setItem('tc_school_url', url);
 
-    // Hide login UI
-    initialLogin.classList.add('hidden');
-
-    // Load the site
-    loadTransparentClassroom(url);
+    // Redirect to the actual login page
+    window.location.href = url;
   });
 
   // Handle frame load events
